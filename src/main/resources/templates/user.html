@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your profile</title>
+</head>
+<body>
+<table border="1" cellpadding="10">
+    <thead>
+    <tr>User</tr>
+    </thead>
+    <tbody>
+    <tr>
+        <div sec:authorize="hasAuthority('ADMIN')">
+            <th>ID</th>
+        </div>
+        <th>Username</th>
+        <th>Password</th>
+        <div sec:authorize="hasAuthority('ADMIN')">
+            <th>Roles</th>
+        </div>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Age</th>
+    </tr>
+    <div sec:authorize="hasAuthority('ADMIN')">
+        <td th:text="${user.id}"></td>
+    </div>
+    <td th:text="${user.username}"></td>
+    <td th:password="${user.password}" th:text="'********'"></td>
+    <div sec:authorize="hasAuthority('ADMIN')">
+        <td th:text="${user.roles}"></td>
+    </div>
+    <td th:text="${user.name}"></td>
+    <td th:text="${user.email}"></td>
+    <td th:text="${user.age}"></td>
+    </tbody>
+</table>
+<br/>
+<div sec:authorize="hasAuthority('ADMIN')">
+    <a th:href="@{/admin/{id}/edit(id=${user.id})}">Edit user</a>
+    <p>
+        <form th:method="DELETE" th:action="@{'/admin/'+${user.id}}">
+        <input type="submit" value="Delete user"/>
+    </form>
+    </p>
+</div>
+<p>
+<form method="POST" th:action="@{/logout}" >
+    <input type="submit" value="Logout"/>
+</form>
+</p>
+</body>
+</html>
