@@ -1,5 +1,6 @@
 package com.javamentor.springboot.controllers;
 
+import com.javamentor.springboot.service.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,19 +11,17 @@ import com.javamentor.springboot.model.User;
 @Controller
 @RequestMapping("/user")
 public class UsersController {
+    private final UserService userService;
 
-    /*@GetMapping
-    public ModelAndView showCurrentUser() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("user");
-        modelAndView.addObject("user", user);
-        return modelAndView;
-    }*/
+    public UsersController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping
     public String showUser(Model model) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         model.addAttribute("user", user);
+        model.addAttribute("userRoles", userService.showRoles(user));
         return "user";
     }
 }

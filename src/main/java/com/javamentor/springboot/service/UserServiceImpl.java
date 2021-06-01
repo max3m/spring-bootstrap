@@ -1,5 +1,6 @@
 package com.javamentor.springboot.service;
 
+import com.javamentor.springboot.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import com.javamentor.springboot.dao.RoleDAO;
 import com.javamentor.springboot.dao.UserDAO;
 import com.javamentor.springboot.model.User;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -69,6 +71,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userDAO.getUserByName(username);
         return user;
+    }
+
+    @Override
+    public String showRoles(User user) {
+        Set<Role> userRolesSet = user.getRoles();
+        StringBuilder userRoles = new StringBuilder();
+        for (Role role:userRolesSet) {
+            userRoles.append(role.toString());
+            userRoles.append(" ");
+        }
+        return userRoles.toString();
     }
 
     @Bean

@@ -1,17 +1,13 @@
 package com.javamentor.springboot.controllers;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 import com.javamentor.springboot.dao.RoleDAO;
 import com.javamentor.springboot.model.User;
 import com.javamentor.springboot.service.UserService;
-
-import javax.servlet.http.HttpServletRequest;
-
 
 @Controller
 @RequestMapping("/admin")
@@ -28,58 +24,28 @@ public class AdminController {
 
     @GetMapping
     public String allUsers(Model model) {
-        model.addAttribute("allUsersList", userService.allUsers());
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        model.addAttribute("authorizedUser", user);
+        model.addAttribute("userRoles", userService.showRoles(user));
+        model.addAttribute("allUsers", userService.allUsers());
+        model.addAttribute("newUser", new User());
+        model.addAttribute("allRoles", roleDAO.getRoleSet());
         return "admin";
     }
 
-    @GetMapping(value = "/new")
-    public ModelAndView newUserPage(/*@ModelAttribute("user") User user, Model model*/) {
-        /*model.addAttribute("rolesList", roleDAO.getRoleSet());
-        return "new";*/
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("new");
-        modelAndView.addObject("user", new User());
-        modelAndView.addObject("rolesList", roleDAO.getRoleSet());
-        return modelAndView;
-    }
-
-    /*@PostMapping(value = "")
-    public String newUserPost(@ModelAttribute("user") User user, HttpServletRequest req) {
-        String[] selectedRoles = req.getParameterValues("roles");
-        userService.save(user, selectedRoles);
-        return "redirect:/admin";
-    }*/
-    @Transactional
-    @PostMapping(value = "")
-    public String newUserPost(@ModelAttribute("user") User user,
-                              @RequestParam("selectedRoles") String[] selectedRoles) {
+    @PostMapping("/create")
+    public String addUser(@ModelAttribute("user") User user, @RequestParam(value = "roleList") String [] selectedRoles){
         userService.save(user, selectedRoles);
         return "redirect:/admin";
     }
 
-    @GetMapping("/{id}")
-    public String showUser(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.getById(id));
-        return "user";
-    }
-
-    @GetMapping("/{id}/edit")
-    public String editPage(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.getById(id));
-        model.addAttribute("rolesList", roleDAO.getRoleSet());
-        return "edit";
-    }
-
-    @Transactional
-    @PatchMapping(value = "/{id}")
-    public String editUserPatch(@ModelAttribute("user") User user, HttpServletRequest req) {
-        String[] selectedRoles = req.getParameterValues("selectedRoles");
-        userService.update(user, selectedRoles);
+    @PostMapping("/update")
+    public String editUser(@ModelAttribute User user ,@RequestParam(value = "roleList") String [] selectedRoles ){
+        userService.save(user, selectedRoles);
         return "redirect:/admin";
     }
 
-    @Transactional
-    @DeleteMapping("/{id}")
+    @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable("id") long id) {
         userService.delete(userService.getById(id));
         return "redirect:/admin";
